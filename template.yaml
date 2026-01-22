@@ -1,0 +1,300 @@
+AWSTemplateFormatVersion: '2010-09-09'
+Transform: AWS::Serverless-2016-10-31
+
+Description: Voice Farming Assistant - Voice-native agricultural intelligence system
+
+Globals:
+  Function:
+    Timeout: 120
+    MemorySize: 512
+    Runtime: nodejs18.x
+    Environment:
+      Variables:
+        DYNAMODB_TABLE: !Ref FarmerProfileTable
+        BEDROCK_MODEL_ID: anthropic.claude-v2
+        REGION: !Ref AWS::Region
+
+Parameters:
+  Environment:
+    Type: String
+    Default: dev
+    AllowedValues:
+      - dev
+      - staging
+      - prod
+    Description: Environment name
+
+Resources:
+  # DynamoDB Tables
+  FarmerProfileTable:
+    Type: AWS::DynamoDB::Table
+    Properties:
+      TableName: !Sub 'farmer-profiles-${Environment}'
+      BillingMode: PAY_PER_REQUEST
+      AttributeDefinitions:
+        - AttributeName: farmerId
+          AttributeType: S
+        - AttributeName: createdAt
+          AttributeType: N
+      KeySchema:
+        - AttributeName: farmerId
+          KeyType: HASH
+        - AttributeName: createdAt
+          KeyType: RANGE
+      GlobalSecondaryIndexes:
+        - IndexName: phoneNumberIndex
+          KeySchema:
+            - AttributeName: phoneNumber
+              KeyType: HASH
+          Projection:
+            ProjectionType: ALL
+      StreamSpecification:
+        StreamViewType: NEW_AND_OLD_IMAGES
+      Tags:
+        - Key: Environment
+          Value: !Ref Environment
+
+  CropDataTable:
+    Type: AWS::DynamoDB::Table
+    Properties:
+      TableName: !Sub 'crop-data-${Environment}'
+      BillingMode: PAY_PER_REQUEST
+      AttributeDefinitions:
+        - AttributeName: cropId
+          AttributeType: S
+        - AttributeName: timestamp
+          AttributeType: N
+      KeySchema:
+        - AttributeName: cropId
+          KeyType: HASH
+        - AttributeName: timestamp
+          KeyType: RANGE
+      Tags:
+        - Key: Environment
+          Value: !Ref Environment
+
+  ConversationHistoryTable:
+    Type: AWS::DynamoDB::Table
+    Properties:
+      TableName: !Sub 'conversation-history-${Environment}'
+      BillingMode: PAY_PER_REQUEST
+      AttributeDefinitions:
+        - AttributeName: conversationId
+          AttributeType: S
+        - AttributeName: timestamp
+          AttributeType: N
+      KeySchema:
+        - AttributeName: conversationId
+          KeyType: HASH
+        - AttributeName: timestamp
+          KeyType: RANGE
+      TimeToLiveSpecification:
+        AttributeName: ttl
+        Enabled: true
+      Tags:
+        - Key: Environment
+          Value: !Ref Environment
+
+  # S3 Buckets
+  MediaBucket:
+    Type: AWS::S3::Bucket
+    Properties:
+      BucketName: !Sub 'vfa-media-${AWS::AccountId}-${Environment}'
+      VersioningConfiguration:
+        Status: Enabled
+      PublicAccessBlockConfiguration:
+        BlockPublicAcls: true
+        BlockPublicPolicy: true
+        IgnorePublicAcls: true
+        RestrictPublicBuckets: true
+      Tags:
+        - Key: Environment
+          Value: !Ref Environment
+
+  ModelBucket:
+    Type: AWS::S3::Bucket
+    Properties:
+      BucketName: !Sub 'vfa-models-${AWS::AccountId}-${Environment}'
+      VersioningConfiguration:
+        Status: Enabled
+      PublicAccessBlockConfiguration:
+        BlockPublicAcls: true
+        BlockPublicPolicy: true
+        IgnorePublicAcls: true
+        RestrictPublicBuckets: true
+      Tags:
+        - Key: Environment
+          Value: !Ref Environment
+
+  # Lambda Functions
+  ConnectHandlerFunction:
+    Type: AWS::Serverless::Function
+    Properties:
+      FunctionName: !Sub 'vfa-connect-handler-${Environment}'
+      CodeUri: backend/lambda/connect-handler/
+      Handler: index.handler
+      Policies:
+        - DynamoDBCrudPolicy:
+            TableName: !Ref FarmerProfileTable
+        - DynamoDBCrudPolicy:
+            TableName: !Ref ConversationHistoryTable
+        - S3CrudPolicy:
+            BucketName: !Ref MediaBucket
+      Events:
+        ConnectAPI:
+          Type: Api
+          Properties:
+            RestApiId: !Ref ConnectAPI
+            Path: /call
+            Method: POST
+      Tags:
+        Environment: !Ref Environment
+
+  LexFulfillmentFunction:
+    Type: AWS::Serverless::Function
+    Properties:
+      FunctionName: !Sub 'vfa-lex-fulfillment-${Environment}'
+      CodeUri: backend/lambda/lex-fulfillment/
+      Handler: index.handler
+      Policies:
+        - DynamoDBCrudPolicy:
+            TableName: !Ref CropDataTable
+        - DynamoDBReadPolicy:
+            TableName: !Ref FarmerProfileTable
+      Events:
+        LexRequest:
+          Type: Api
+          Properties:
+            RestApiId: !Ref LexAPI
+            Path: /fulfillment
+            Method: POST
+      Tags:
+        Environment: !Ref Environment
+
+  BedrockAgentFunction:
+    Type: AWS::Serverless::Function
+    Properties:
+      FunctionName: !Sub 'vfa-bedrock-agent-${Environment}'
+      CodeUri: backend/lambda/bedrock-agent/
+      Handler: index.handler
+      Timeout: 300
+      Policies:
+        - Version: '2012-10-17'
+          Statement:
+            - Effect: Allow
+              Action:
+                - bedrock:InvokeModel
+              Resource: '*'
+            - Effect: Allow
+              Action:
+                - dynamodb:GetItem
+              Resource:
+                - !GetAtt CropDataTable.Arn
+      Tags:
+        Environment: !Ref Environment
+
+  DataProcessorFunction:
+    Type: AWS::Serverless::Function
+    Properties:
+      FunctionName: !Sub 'vfa-data-processor-${Environment}'
+      CodeUri: backend/lambda/data-processor/
+      Handler: index.handler
+      Timeout: 300
+      Policies:
+        - DynamoDBCrudPolicy:
+            TableName: !Ref CropDataTable
+        - S3CrudPolicy:
+            BucketName: !Ref MediaBucket
+        - S3ReadPolicy:
+            BucketName: !Ref ModelBucket
+      Events:
+        S3Upload:
+          Type: S3
+          Properties:
+            Bucket: !Ref MediaBucket
+            Events: s3:ObjectCreated:*
+      Tags:
+        Environment: !Ref Environment
+
+  # API Gateways
+  ConnectAPI:
+    Type: AWS::ApiGateway::RestApi
+    Properties:
+      Name: !Sub 'vfa-connect-api-${Environment}'
+      Description: Connect integration API
+
+  LexAPI:
+    Type: AWS::ApiGateway::RestApi
+    Properties:
+      Name: !Sub 'vfa-lex-api-${Environment}'
+      Description: Lex fulfillment API
+
+  # IAM Roles
+  LambdaExecutionRole:
+    Type: AWS::IAM::Role
+    Properties:
+      AssumeRolePolicyDocument:
+        Version: '2012-10-17'
+        Statement:
+          - Effect: Allow
+            Principal:
+              Service: lambda.amazonaws.com
+            Action: sts:AssumeRole
+      ManagedPolicyArns:
+        - arn:aws:iam::aws:policy/service-role/AWSLambdaBasicExecutionRole
+      Policies:
+        - PolicyName: VFAPolicy
+          PolicyDocument:
+            Version: '2012-10-17'
+            Statement:
+              - Effect: Allow
+                Action:
+                  - bedrock:InvokeModel
+                  - polly:SynthesizeSpeech
+                  - connect:*
+                Resource: '*'
+
+  # CloudWatch Log Groups
+  ConnectLogGroup:
+    Type: AWS::Logs::LogGroup
+    Properties:
+      LogGroupName: !Sub '/aws/lambda/vfa-connect-${Environment}'
+      RetentionInDays: 30
+
+  LexLogGroup:
+    Type: AWS::Logs::LogGroup
+    Properties:
+      LogGroupName: !Sub '/aws/lambda/vfa-lex-${Environment}'
+      RetentionInDays: 30
+
+  BedrockLogGroup:
+    Type: AWS::Logs::LogGroup
+    Properties:
+      LogGroupName: !Sub '/aws/lambda/vfa-bedrock-${Environment}'
+      RetentionInDays: 30
+
+Outputs:
+  FarmerProfileTableName:
+    Value: !Ref FarmerProfileTable
+    Export:
+      Name: !Sub '${AWS::StackName}-FarmerTable'
+
+  CropDataTableName:
+    Value: !Ref CropDataTable
+    Export:
+      Name: !Sub '${AWS::StackName}-CropTable'
+
+  MediaBucketName:
+    Value: !Ref MediaBucket
+    Export:
+      Name: !Sub '${AWS::StackName}-MediaBucket'
+
+  ConnectFunctionArn:
+    Value: !GetAtt ConnectHandlerFunction.Arn
+    Export:
+      Name: !Sub '${AWS::StackName}-ConnectFunction'
+
+  BedrockFunctionArn:
+    Value: !GetAtt BedrockAgentFunction.Arn
+    Export:
+      Name: !Sub '${AWS::StackName}-BedrockFunction'

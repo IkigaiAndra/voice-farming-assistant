@@ -1,0 +1,39 @@
+{
+  "name": "PestDetection",
+  "description": "Intent for pest identification and treatment",
+  "fulfillmentActivity": {
+    "type": "CodeHook",
+    "codeHook": {
+      "uri": "arn:aws:lambda:region:account:function:vfa-lex-fulfillment",
+      "messageVersion": "1.0"
+    }
+  },
+  "slots": [
+    {
+      "name": "cropType",
+      "description": "Type of crop affected",
+      "slotType": "CropTypeSlot",
+      "slotTypeVersion": "$LATEST",
+      "priority": 1,
+      "sampleUtterances": [
+        "{cropType}",
+        "on my {cropType}",
+        "my {cropType}"
+      ],
+      "valueSelectionStrategy": "TOP_RESOLUTION"
+    }
+  ],
+  "sampleUtterances": [
+    "i have pests",
+    "pest problem",
+    "identify pests",
+    "what pest is this",
+    "insects on my {cropType}",
+    "bugs are eating my {cropType}",
+    "help with pests",
+    "pest detection",
+    "send pest photo"
+  ],
+  "priority": 2,
+  "createVersion": true
+}
