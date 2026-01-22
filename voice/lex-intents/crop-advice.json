@@ -1,0 +1,71 @@
+{
+  "name": "CropAdvice",
+  "description": "Intent for getting advice about specific crop issues",
+  "fulfillmentActivity": {
+    "type": "CodeHook",
+    "codeHook": {
+      "uri": "arn:aws:lambda:region:account:function:vfa-lex-fulfillment",
+      "messageVersion": "1.0"
+    }
+  },
+  "slots": [
+    {
+      "name": "cropType",
+      "description": "Type of crop",
+      "slotType": "CropTypeSlot",
+      "slotTypeVersion": "$LATEST",
+      "priority": 1,
+      "sampleUtterances": [
+        "my {cropType}",
+        "about {cropType}",
+        "with {cropType}"
+      ],
+      "valueSelectionStrategy": "TOP_RESOLUTION"
+    },
+    {
+      "name": "issue",
+      "description": "Issue with the crop",
+      "slotType": "AMAZON.AlphaNumeric",
+      "priority": 2,
+      "sampleUtterances": [
+        "the leaves are {issue}",
+        "having {issue}",
+        "{issue} problem"
+      ],
+      "valueSelectionStrategy": "TOP_RESOLUTION"
+    }
+  ],
+  "sampleUtterances": [
+    "help with my {cropType}",
+    "my {cropType} has {issue}",
+    "what to do about {issue}",
+    "advice for {cropType}",
+    "tell me about {cropType} {issue}",
+    "my {cropType} is {issue}",
+    "how to fix {issue}",
+    "what's wrong with my crop",
+    "crop advice",
+    "farming help"
+  ],
+  "confirmationPrompt": {
+    "messages": [
+      {
+        "contentType": "PlainText",
+        "content": "Should I help you with {cropType} {issue}?"
+      }
+    ],
+    "maxAttempts": 2
+  },
+  "rejectionStatement": {
+    "messages": [
+      {
+        "contentType": "PlainText",
+        "content": "OK, I'll wait for your request."
+      }
+    ]
+  },
+  "followUpPrompt": null,
+  "priority": 1,
+  "createVersion": true,
+  "detectSentiment": true
+}

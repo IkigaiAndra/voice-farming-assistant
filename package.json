@@ -1,0 +1,57 @@
+{
+  "name": "voice-farming-assistant",
+  "version": "0.1.0",
+  "description": "India's first voice-native agricultural intelligence system",
+  "main": "index.js",
+  "type": "module",
+  "scripts": {
+    "dev": "node backend/server.js",
+    "test": "jest --coverage",
+    "test:lex": "jest backend/tests/lex.test.js",
+    "test:integration": "jest backend/tests/integration.test.js",
+    "deploy:dev": "sam deploy --guided --profile dev",
+    "deploy:staging": "sam deploy --guided --profile staging",
+    "deploy:prod": "sam deploy --guided --profile prod",
+    "build": "npm install && npm run package",
+    "package": "zip -r deploy.zip . -x 'node_modules/*' '.git/*' '.gitignore'",
+    "lint": "eslint .",
+    "format": "prettier --write ."
+  },
+  "keywords": [
+    "agriculture",
+    "voice",
+    "AWS",
+    "Lex",
+    "Bedrock",
+    "India",
+    "farming"
+  ],
+  "author": "IkigaiAndra",
+  "license": "MIT",
+  "dependencies": {
+    "aws-sdk": "^2.1500.0",
+    "@aws-sdk/client-dynamodb": "^3.400.0",
+    "@aws-sdk/client-lambda": "^3.400.0",
+    "@aws-sdk/client-polly": "^3.400.0",
+    "@aws-sdk/client-bedrock-runtime": "^3.400.0",
+    "@aws-sdk/util-dynamodb": "^3.400.0",
+    "express": "^4.18.2",
+    "cors": "^2.8.5",
+    "dotenv": "^16.3.1",
+    "axios": "^1.6.1",
+    "multer": "^1.4.5-lts.1",
+    "sharp": "^0.32.6",
+    "twilio": "^3.97.0"
+  },
+  "devDependencies": {
+    "jest": "^29.7.0",
+    "eslint": "^8.50.0",
+    "prettier": "^3.0.3",
+    "@types/jest": "^29.5.7",
+    "aws-sdk-client-mock": "^3.0.0",
+    "dotenv-cli": "^7.3.0"
+  },
+  "engines": {
+    "node": ">=18.0.0"
+  }
+}

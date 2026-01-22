@@ -1,0 +1,56 @@
+{
+  "languageConfigs": {
+    "hin": {
+      "language": "Hindi",
+      "voiceId": "Aditi",
+      "textType": "ssml",
+      "engine": "neural"
+    },
+    "tam": {
+      "language": "Tamil",
+      "voiceId": "Tamizh",
+      "textType": "ssml",
+      "engine": "neural"
+    },
+    "tel": {
+      "language": "Telugu",
+      "voiceId": "Telugu",
+      "textType": "ssml",
+      "engine": "neural"
+    },
+    "kan": {
+      "language": "Kannada",
+      "voiceId": "Kannada",
+      "textType": "ssml",
+      "engine": "neural"
+    },
+    "mal": {
+      "language": "Malayalam",
+      "voiceId": "Malayalam",
+      "textType": "ssml",
+      "engine": "neural"
+    },
+    "mar": {
+      "language": "Marathi",
+      "voiceId": "Marathi",
+      "textType": "ssml",
+      "engine": "neural"
+    },
+    "eng": {
+      "language": "English",
+      "voiceId": "Joanna",
+      "textType": "ssml",
+      "engine": "neural"
+    }
+  },
+  "voiceSettings": {
+    "speechRate": 0.95,
+    "pitchRate": 1.0,
+    "volume": "medium"
+  },
+  "audioFormat": {
+    "format": "mp3",
+    "sampleRate": 16000,
+    "bitRate": 128000
+  }
+}

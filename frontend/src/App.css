@@ -1,0 +1,442 @@
+/**
+ * Main App Styling
+ * Voice Farming Assistant - Global Styles
+ */
+
+:root {
+  /* Colors */
+  --primary-color: #2d8a3d;
+  --primary-light: #4caf50;
+  --primary-dark: #1b5e20;
+  --accent-color: #ff9800;
+  --accent-light: #ffb74d;
+  --accent-dark: #f57c00;
+  
+  --text-primary: #212121;
+  --text-secondary: #757575;
+  --text-light: #bdbdbd;
+  
+  --bg-primary: #ffffff;
+  --bg-secondary: #f5f5f5;
+  --bg-tertiary: #eeeeee;
+  
+  --success-color: #4caf50;
+  --warning-color: #ff9800;
+  --error-color: #f44336;
+  --info-color: #2196f3;
+  
+  --shadow-sm: 0 1px 3px rgba(0, 0, 0, 0.12);
+  --shadow-md: 0 4px 6px rgba(0, 0, 0, 0.1);
+  --shadow-lg: 0 10px 20px rgba(0, 0, 0, 0.15);
+  
+  --border-radius: 8px;
+  --transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  --font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+}
+
+/* Dark Mode */
+@media (prefers-color-scheme: dark) {
+  :root {
+    --text-primary: #ffffff;
+    --text-secondary: #b0b0b0;
+    --text-light: #757575;
+    
+    --bg-primary: #121212;
+    --bg-secondary: #1e1e1e;
+    --bg-tertiary: #2c2c2c;
+  }
+}
+
+/* ==================== Reset & Base Styles ==================== */
+
+* {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+}
+
+html, body {
+  height: 100%;
+  width: 100%;
+  font-family: var(--font-family);
+  font-size: 16px;
+  line-height: 1.6;
+  color: var(--text-primary);
+  background-color: var(--bg-primary);
+  transition: background-color 0.3s, color 0.3s;
+}
+
+body {
+  margin: 0;
+  padding: 0;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
+#root {
+  height: 100%;
+  width: 100%;
+}
+
+/* ==================== Typography ==================== */
+
+h1 {
+  font-size: 2.5rem;
+  font-weight: 700;
+  line-height: 1.2;
+  margin-bottom: 0.5rem;
+  color: var(--primary-color);
+}
+
+h2 {
+  font-size: 2rem;
+  font-weight: 600;
+  line-height: 1.3;
+  margin-bottom: 1rem;
+}
+
+h3 {
+  font-size: 1.5rem;
+  font-weight: 600;
+  margin-bottom: 0.75rem;
+}
+
+p {
+  margin-bottom: 1rem;
+  color: var(--text-secondary);
+}
+
+a {
+  color: var(--primary-color);
+  text-decoration: none;
+  transition: color 0.3s;
+}
+
+a:hover {
+  color: var(--primary-dark);
+  text-decoration: underline;
+}
+
+button {
+  font-family: inherit;
+  cursor: pointer;
+  border: none;
+  transition: var(--transition);
+}
+
+/* ==================== App Layout ==================== */
+
+.app {
+  display: flex;
+  flex-direction: column;
+  height: 100vh;
+  background: linear-gradient(135deg, var(--bg-primary) 0%, var(--bg-secondary) 100%);
+}
+
+/* App Header */
+.app-header {
+  background: linear-gradient(135deg, var(--primary-color) 0%, var(--primary-light) 100%);
+  color: white;
+  padding: 1.5rem 2rem;
+  box-shadow: var(--shadow-md);
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.header-content h1 {
+  color: white;
+  font-size: 2rem;
+  margin: 0;
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  animation: bounce 0.6s ease-in-out;
+}
+
+.header-content p {
+  color: rgba(255, 255, 255, 0.9);
+  margin: 0.25rem 0 0 0;
+  font-size: 0.9rem;
+}
+
+.header-info {
+  display: flex;
+  gap: 1rem;
+  align-items: center;
+}
+
+.farmer-name {
+  background: rgba(255, 255, 255, 0.2);
+  padding: 0.5rem 1rem;
+  border-radius: var(--border-radius);
+  font-weight: 600;
+  backdrop-filter: blur(10px);
+}
+
+/* App Main */
+.app-main {
+  flex: 1;
+  overflow: hidden;
+  display: flex;
+  flex-direction: column;
+  padding: 1rem;
+}
+
+/* App Footer */
+.app-footer {
+  background: var(--bg-secondary);
+  border-top: 1px solid var(--bg-tertiary);
+  padding: 1rem;
+  text-align: center;
+  font-size: 0.85rem;
+  color: var(--text-secondary);
+}
+
+.app-footer p {
+  margin: 0.25rem 0;
+}
+
+.footer-links a {
+  margin: 0 0.5rem;
+}
+
+/* ==================== Loading State ==================== */
+
+.app-loading {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  height: 100vh;
+  background: linear-gradient(135deg, var(--primary-light) 0%, var(--primary-color) 100%);
+}
+
+.loading-container {
+  text-align: center;
+  color: white;
+}
+
+.loading-spinner {
+  margin-bottom: 2rem;
+}
+
+.spinner {
+  width: 60px;
+  height: 60px;
+  border: 4px solid rgba(255, 255, 255, 0.3);
+  border-top: 4px solid white;
+  border-radius: 50%;
+  animation: spin 1s linear infinite;
+  margin: 0 auto;
+}
+
+@keyframes spin {
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+@keyframes bounce {
+  0%, 100% {
+    transform: translateY(0);
+  }
+  50% {
+    transform: translateY(-10px);
+  }
+}
+
+.loading-container h2 {
+  font-size: 1.8rem;
+  margin-bottom: 0.5rem;
+  color: white;
+}
+
+.loading-container p {
+  color: rgba(255, 255, 255, 0.9);
+  font-size: 1.1rem;
+}
+
+/* ==================== Error State ==================== */
+
+.app-error {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  height: 100vh;
+  background: linear-gradient(135deg, #ff6b6b 0%, #ee5a52 100%);
+  padding: 2rem;
+}
+
+.error-container {
+  background: white;
+  border-radius: var(--border-radius);
+  padding: 2rem;
+  max-width: 600px;
+  box-shadow: var(--shadow-lg);
+  text-align: center;
+}
+
+.error-container h2 {
+  color: var(--error-color);
+  margin-bottom: 1rem;
+}
+
+.error-container p {
+  color: var(--text-secondary);
+  margin-bottom: 1.5rem;
+  font-size: 1.1rem;
+}
+
+.error-details {
+  background: var(--bg-secondary);
+  border-left: 4px solid var(--error-color);
+  padding: 1.5rem;
+  border-radius: 4px;
+  text-align: left;
+  margin-bottom: 1.5rem;
+}
+
+.error-details h3 {
+  font-size: 1rem;
+  margin-bottom: 0.75rem;
+  color: var(--error-color);
+}
+
+.error-details ul {
+  list-style-position: inside;
+  color: var(--text-secondary);
+  font-size: 0.9rem;
+}
+
+.error-details li {
+  margin-bottom: 0.5rem;
+}
+
+.error-container button {
+  background: var(--primary-color);
+  color: white;
+  padding: 0.75rem 2rem;
+  border-radius: var(--border-radius);
+  font-weight: 600;
+  font-size: 1rem;
+  cursor: pointer;
+  transition: var(--transition);
+}
+
+.error-container button:hover {
+  background: var(--primary-dark);
+  box-shadow: var(--shadow-md);
+  transform: translateY(-2px);
+}
+
+/* ==================== Responsive Design ==================== */
+
+/* Tablet */
+@media (max-width: 768px) {
+  h1 {
+    font-size: 2rem;
+  }
+
+  h2 {
+    font-size: 1.5rem;
+  }
+
+  .app-header {
+    padding: 1rem;
+    flex-direction: column;
+    gap: 1rem;
+  }
+
+  .header-content h1 {
+    font-size: 1.5rem;
+  }
+
+  .header-info {
+    width: 100%;
+    justify-content: center;
+  }
+}
+
+/* Mobile */
+@media (max-width: 480px) {
+  h1 {
+    font-size: 1.5rem;
+  }
+
+  h2 {
+    font-size: 1.25rem;
+  }
+
+  .app-header {
+    padding: 0.75rem;
+  }
+
+  .header-content h1 {
+    font-size: 1.25rem;
+  }
+
+  .header-content p {
+    font-size: 0.8rem;
+  }
+
+  .app-footer {
+    padding: 0.75rem;
+    font-size: 0.75rem;
+  }
+
+  .error-container {
+    padding: 1.5rem;
+  }
+
+  .error-details {
+    padding: 1rem;
+  }
+
+  .error-details h3 {
+    font-size: 0.9rem;
+  }
+
+  .error-details ul {
+    font-size: 0.8rem;
+  }
+}
+
+/* ==================== Accessibility ==================== */
+
+@media (prefers-reduced-motion: reduce) {
+  * {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+  }
+}
+
+/* High Contrast */
+@media (prefers-contrast: more) {
+  :root {
+    --primary-color: #1a4d20;
+    --primary-light: #2d8a3d;
+    --text-primary: #000000;
+    --bg-primary: #ffffff;
+  }
+}
+
+/* Focus Visible */
+button:focus-visible,
+a:focus-visible,
+input:focus-visible {
+  outline: 3px solid var(--primary-color);
+  outline-offset: 2px;
+}
+
+/* Print Styles */
+@media print {
+  .app-header,
+  .app-footer {
+    display: none;
+  }
+
+  .app-main {
+    padding: 0;
+  }
+}
